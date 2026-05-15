@@ -22,4 +22,19 @@ public final class ErrorMessages {
 
     public static final String COMPETITION_NOT_OPEN =
             "Competition is not open for registrations";
+
+    public static final String COMPETITION_IS_NOT_SLALOM =
+            "Competition with id %d is not a slalom competition";
+
+    public static final String ATHLETE_NOT_REGISTERED_FOR_COMPETITION =
+            "Athlete with id %d is not registered for competition with id %d";
+
+    public static final String SLALOM_RESULT_NOT_FOUND =
+            "Slalom result for competition id %d and athlete id %d was not found";
+
+    public static final String ATHLETE_NOT_QUALIFIED_FOR_SECOND_RUN =
+            "Athlete with id %d is not qualified for the second run";
+
+    public static final String SECOND_RUN_CANNOT_BE_ENTERED_BEFORE_QUALIFICATION =
+            "Second run results cannot be entered before second run qualification";
 }

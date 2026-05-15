@@ -14,5 +14,9 @@ public interface SlalomResultRepository extends JpaRepository<SlalomResultEntity
 
     boolean existsByCompetitionIdAndAthleteId(Long competitionId, Long athleteId);
 
+    List<SlalomResultEntity> findByCompetitionIdOrderByFirstRunTimeAsc(Long competitionId);
+
+    List<SlalomResultEntity> findByCompetitionIdAndQualifiedForSecondRunTrueOrderByFirstRunTimeDesc(Long competitionId);
+
     List<SlalomResultEntity> findByCompetitionIdOrderByTotalTimeAsc(Long competitionId);
 }

@@ -31,4 +31,12 @@ public final class ValidationMessages {
     public static final String COMPETITION_DATE_FUTURE_OR_PRESENT = "Competition date must be today or in the future";
 
     public static final String COMPETITION_STATUS_REQUIRED = "Competition status is required";
+
+    public static final String ATHLETE_ID_REQUIRED = "Athlete id is required";
+
+    public static final String FIRST_RUN_TIME_POSITIVE = "First run time must be greater than 0";
+    public static final String SECOND_RUN_TIME_POSITIVE = "Second run time must be greater than 0";
+
+    public static final String QUALIFICATION_LIMIT_REQUIRED = "Qualification limit is required";
+    public static final String QUALIFICATION_LIMIT_MIN = "Qualification limit must be at least 1";
 }

@@ -19,4 +19,8 @@ public interface SlalomResultRepository extends JpaRepository<SlalomResultEntity
     List<SlalomResultEntity> findByCompetitionIdAndQualifiedForSecondRunTrueOrderByFirstRunTimeDesc(Long competitionId);
 
     List<SlalomResultEntity> findByCompetitionIdOrderByTotalTimeAsc(Long competitionId);
+
+    List<SlalomResultEntity> findByCompetitionIdAndQualifiedForSecondRunTrueAndTotalTimeIsNotNullOrderByTotalTimeAsc(
+            Long competitionId
+    );
 }

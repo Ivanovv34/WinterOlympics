@@ -37,4 +37,10 @@ public final class ErrorMessages {
 
     public static final String SECOND_RUN_CANNOT_BE_ENTERED_BEFORE_QUALIFICATION =
             "Second run results cannot be entered before second run qualification";
+
+    public static final String SLALOM_RANKING_CANNOT_BE_CALCULATED_BEFORE_SECOND_RUN =
+            "Slalom ranking cannot be calculated before second run results are entered";
+
+    public static final String NO_VALID_SLALOM_RESULTS_FOR_RANKING =
+            "There are no valid slalom results for ranking";
 }

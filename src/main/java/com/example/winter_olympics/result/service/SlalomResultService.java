@@ -18,4 +18,8 @@ public interface SlalomResultService {
     List<SlalomResultResponse> getSlalomResults(Long competitionId);
 
     List<SlalomResultResponse> getSecondRunStartList(Long competitionId);
+
+    List<SlalomResultResponse> calculateRanking(Long competitionId);
+
+    List<SlalomResultResponse> getRanking(Long competitionId);
 }

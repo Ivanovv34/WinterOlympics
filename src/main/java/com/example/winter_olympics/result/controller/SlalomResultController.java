@@ -54,6 +54,15 @@ public class SlalomResultController {
         );
     }
 
+    @PostMapping("/calculate-ranking")
+    public ResponseEntity<List<SlalomResultResponse>> calculateRanking(
+            @PathVariable Long competitionId
+    ) {
+        return ResponseEntity.ok(
+                slalomResultService.calculateRanking(competitionId)
+        );
+    }
+
     @GetMapping("/results")
     public ResponseEntity<List<SlalomResultResponse>> getSlalomResults(
             @PathVariable Long competitionId
@@ -69,6 +78,15 @@ public class SlalomResultController {
     ) {
         return ResponseEntity.ok(
                 slalomResultService.getSecondRunStartList(competitionId)
+        );
+    }
+
+    @GetMapping("/ranking")
+    public ResponseEntity<List<SlalomResultResponse>> getRanking(
+            @PathVariable Long competitionId
+    ) {
+        return ResponseEntity.ok(
+                slalomResultService.getRanking(competitionId)
         );
     }
 }

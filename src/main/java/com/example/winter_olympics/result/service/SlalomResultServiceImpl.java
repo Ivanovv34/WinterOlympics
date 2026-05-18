@@ -155,6 +155,72 @@ public class SlalomResultServiceImpl implements SlalomResultService {
                 .toList();
     }
 
+    @Override
+    public List<SlalomResultResponse> calculateRanking(Long competitionId) {
+        CompetitionEntity competition = findSlalomCompetitionById(competitionId);
+
+        if (competition.getStatus() != CompetitionStatus.SECOND_RUN_READY
+                && competition.getStatus() != CompetitionStatus.RESULTS_COMPLETED) {
+            throw new BadRequestException(ErrorMessages.SLALOM_RANKING_CANNOT_BE_CALCULATED_BEFORE_SECOND_RUN);
+        }
+
+        List<SlalomResultEntity> allResults = slalomResultRepository.findByCompetitionId(competitionId);
+
+        allResults.forEach(result -> {
+            result.setRankPosition(null);
+            result.setMedal(MedalType.NONE);
+        });
+
+        List<SlalomResultEntity> rankedResults = allResults.stream()
+                .filter(SlalomResultEntity::isQualifiedForSecondRun)
+                .filter(result -> !result.isDidNotFinishFirstRun())
+                .filter(result -> !result.isDidNotFinishSecondRun())
+                .filter(result -> result.getTotalTime() != null)
+                .sorted(Comparator.comparing(SlalomResultEntity::getTotalTime))
+                .toList();
+
+        if (rankedResults.isEmpty()) {
+            throw new BadRequestException(ErrorMessages.NO_VALID_SLALOM_RESULTS_FOR_RANKING);
+        }
+
+        for (int i = 0; i < rankedResults.size(); i++) {
+            SlalomResultEntity result = rankedResults.get(i);
+            int rank = i + 1;
+
+            result.setRankPosition(rank);
+            result.setMedal(getMedalByRank(rank));
+        }
+
+        competition.setStatus(CompetitionStatus.RESULTS_COMPLETED);
+        competitionRepository.save(competition);
+
+        slalomResultRepository.saveAll(allResults);
+
+        return getRanking(competitionId);
+    }
+
+    @Override
+    public List<SlalomResultResponse> getRanking(Long competitionId) {
+        findSlalomCompetitionById(competitionId);
+
+        return slalomResultRepository
+                .findByCompetitionIdAndQualifiedForSecondRunTrueAndTotalTimeIsNotNullOrderByTotalTimeAsc(competitionId)
+                .stream()
+                .filter(result -> !result.isDidNotFinishFirstRun())
+                .filter(result -> !result.isDidNotFinishSecondRun())
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    private MedalType getMedalByRank(int rank) {
+        return switch (rank) {
+            case 1 -> MedalType.GOLD;
+            case 2 -> MedalType.SILVER;
+            case 3 -> MedalType.BRONZE;
+            default -> MedalType.NONE;
+        };
+    }
+
     private CompetitionEntity findSlalomCompetitionById(Long competitionId) {
         CompetitionEntity competition = competitionRepository.findById(competitionId)
                 .orElseThrow(() -> new ResourceNotFoundException(

@@ -52,4 +52,7 @@ public final class ErrorMessages {
 
     public static final String NO_VALID_BIATHLON_RESULTS_FOR_RANKING =
             "There are no valid biathlon results for ranking";
+
+    public static final String NO_MEDALISTS_FOUND =
+            "There are no medalists yet";
 }

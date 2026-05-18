@@ -32,12 +32,30 @@ public class BiathlonResultController {
         );
     }
 
+    @PostMapping("/calculate-ranking")
+    public ResponseEntity<List<BiathlonResultResponse>> calculateRanking(
+            @PathVariable Long competitionId
+    ) {
+        return ResponseEntity.ok(
+                biathlonResultService.calculateRanking(competitionId)
+        );
+    }
+
     @GetMapping("/results")
     public ResponseEntity<List<BiathlonResultResponse>> getResults(
             @PathVariable Long competitionId
     ) {
         return ResponseEntity.ok(
                 biathlonResultService.getResults(competitionId)
+        );
+    }
+
+    @GetMapping("/ranking")
+    public ResponseEntity<List<BiathlonResultResponse>> getRanking(
+            @PathVariable Long competitionId
+    ) {
+        return ResponseEntity.ok(
+                biathlonResultService.getRanking(competitionId)
         );
     }
 }

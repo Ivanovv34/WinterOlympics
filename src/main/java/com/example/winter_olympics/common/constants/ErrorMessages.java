@@ -49,4 +49,7 @@ public final class ErrorMessages {
 
     public static final String BIATHLON_RESULT_NOT_FOUND =
             "Biathlon result for competition id %d and athlete id %d was not found";
+
+    public static final String NO_VALID_BIATHLON_RESULTS_FOR_RANKING =
+            "There are no valid biathlon results for ranking";
 }

@@ -15,4 +15,6 @@ public interface BiathlonResultRepository extends JpaRepository<BiathlonResultEn
     boolean existsByCompetitionIdAndAthleteId(Long competitionId, Long athleteId);
 
     List<BiathlonResultEntity> findByCompetitionIdOrderByFinalTimeAsc(Long competitionId);
+
+    List<BiathlonResultEntity> findByCompetitionIdAndFinalTimeIsNotNullOrderByFinalTimeAsc(Long competitionId);
 }

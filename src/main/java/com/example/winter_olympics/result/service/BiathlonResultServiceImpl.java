@@ -6,6 +6,7 @@ import com.example.winter_olympics.common.constants.ErrorMessages;
 import com.example.winter_olympics.common.exception.BadRequestException;
 import com.example.winter_olympics.common.exception.ResourceNotFoundException;
 import com.example.winter_olympics.competition.model.CompetitionEntity;
+import com.example.winter_olympics.competition.model.CompetitionStatus;
 import com.example.winter_olympics.competition.model.CompetitionType;
 import com.example.winter_olympics.competition.repository.CompetitionRepository;
 import com.example.winter_olympics.registration.repository.CompetitionRegistrationRepository;
@@ -85,6 +86,64 @@ public class BiathlonResultServiceImpl implements BiathlonResultService {
                 ))
                 .map(this::mapToResponse)
                 .toList();
+    }
+
+    @Override
+    public List<BiathlonResultResponse> calculateRanking(Long competitionId) {
+        CompetitionEntity competition = findBiathlonCompetitionById(competitionId);
+
+        List<BiathlonResultEntity> allResults = biathlonResultRepository.findByCompetitionId(competitionId);
+
+        allResults.forEach(result -> {
+            result.setRankPosition(null);
+            result.setMedal(MedalType.NONE);
+        });
+
+        List<BiathlonResultEntity> rankedResults = allResults.stream()
+                .filter(result -> !result.isDidNotFinish())
+                .filter(result -> result.getFinalTime() != null)
+                .sorted(Comparator.comparing(BiathlonResultEntity::getFinalTime))
+                .toList();
+
+        if (rankedResults.isEmpty()) {
+            throw new BadRequestException(ErrorMessages.NO_VALID_BIATHLON_RESULTS_FOR_RANKING);
+        }
+
+        for (int i = 0; i < rankedResults.size(); i++) {
+            BiathlonResultEntity result = rankedResults.get(i);
+            int rank = i + 1;
+
+            result.setRankPosition(rank);
+            result.setMedal(getMedalByRank(rank));
+        }
+
+        competition.setStatus(CompetitionStatus.RESULTS_COMPLETED);
+        competitionRepository.save(competition);
+
+        biathlonResultRepository.saveAll(allResults);
+
+        return getRanking(competitionId);
+    }
+
+    @Override
+    public List<BiathlonResultResponse> getRanking(Long competitionId) {
+        findBiathlonCompetitionById(competitionId);
+
+        return biathlonResultRepository
+                .findByCompetitionIdAndFinalTimeIsNotNullOrderByFinalTimeAsc(competitionId)
+                .stream()
+                .filter(result -> !result.isDidNotFinish())
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    private MedalType getMedalByRank(int rank) {
+        return switch (rank) {
+            case 1 -> MedalType.GOLD;
+            case 2 -> MedalType.SILVER;
+            case 3 -> MedalType.BRONZE;
+            default -> MedalType.NONE;
+        };
     }
 
     private CompetitionEntity findBiathlonCompetitionById(Long competitionId) {

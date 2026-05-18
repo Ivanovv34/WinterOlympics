@@ -10,4 +10,8 @@ public interface BiathlonResultService {
     BiathlonResultResponse enterResult(Long competitionId, BiathlonResultRequest request);
 
     List<BiathlonResultResponse> getResults(Long competitionId);
+
+    List<BiathlonResultResponse> calculateRanking(Long competitionId);
+
+    List<BiathlonResultResponse> getRanking(Long competitionId);
 }

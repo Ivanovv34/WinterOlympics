@@ -39,4 +39,8 @@ public final class ValidationMessages {
 
     public static final String QUALIFICATION_LIMIT_REQUIRED = "Qualification limit is required";
     public static final String QUALIFICATION_LIMIT_MIN = "Qualification limit must be at least 1";
+
+    public static final String SKI_TIME_POSITIVE = "Ski time must be greater than 0";
+    public static final String MISSED_SHOTS_REQUIRED = "Missed shots is required";
+    public static final String MISSED_SHOTS_MIN = "Missed shots cannot be negative";
 }

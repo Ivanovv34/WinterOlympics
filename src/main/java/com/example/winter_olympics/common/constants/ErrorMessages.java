@@ -43,4 +43,10 @@ public final class ErrorMessages {
 
     public static final String NO_VALID_SLALOM_RESULTS_FOR_RANKING =
             "There are no valid slalom results for ranking";
+
+    public static final String COMPETITION_IS_NOT_BIATHLON =
+            "Competition with id %d is not a biathlon competition";
+
+    public static final String BIATHLON_RESULT_NOT_FOUND =
+            "Biathlon result for competition id %d and athlete id %d was not found";
 }

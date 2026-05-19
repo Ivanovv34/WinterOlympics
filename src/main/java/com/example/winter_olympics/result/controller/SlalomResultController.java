@@ -5,6 +5,7 @@ import com.example.winter_olympics.result.dto.SlalomQualificationRequest;
 import com.example.winter_olympics.result.dto.SlalomResultResponse;
 import com.example.winter_olympics.result.dto.SlalomSecondRunRequest;
 import com.example.winter_olympics.result.service.SlalomResultService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/competitions/{competitionId}/slalom")
+@SecurityRequirement(name = "basicAuth")
 public class SlalomResultController {
 
     private final SlalomResultService slalomResultService;

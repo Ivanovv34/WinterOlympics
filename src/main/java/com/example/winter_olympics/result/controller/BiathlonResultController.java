@@ -3,6 +3,7 @@ package com.example.winter_olympics.result.controller;
 import com.example.winter_olympics.result.dto.BiathlonResultRequest;
 import com.example.winter_olympics.result.dto.BiathlonResultResponse;
 import com.example.winter_olympics.result.service.BiathlonResultService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/competitions/{competitionId}/biathlon")
+@SecurityRequirement(name = "basicAuth")
 public class BiathlonResultController {
 
     private final BiathlonResultService biathlonResultService;

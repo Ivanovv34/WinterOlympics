@@ -2,6 +2,7 @@ package com.example.winter_olympics.registration.controller;
 
 import com.example.winter_olympics.registration.dto.RegistrationResponse;
 import com.example.winter_olympics.registration.service.CompetitionRegistrationService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@SecurityRequirement(name = "basicAuth")
 public class CompetitionRegistrationController {
 
     private final CompetitionRegistrationService registrationService;

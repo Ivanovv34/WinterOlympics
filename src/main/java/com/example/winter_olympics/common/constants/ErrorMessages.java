@@ -55,4 +55,10 @@ public final class ErrorMessages {
 
     public static final String NO_MEDALISTS_FOUND =
             "There are no medalists yet";
+
+    public static final String USERNAME_ALREADY_EXISTS =
+            "Username already exists";
+
+    public static final String INVALID_USERNAME_OR_PASSWORD =
+            "Invalid username or password";
 }

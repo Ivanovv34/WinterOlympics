@@ -43,4 +43,12 @@ public final class ValidationMessages {
     public static final String SKI_TIME_POSITIVE = "Ski time must be greater than 0";
     public static final String MISSED_SHOTS_REQUIRED = "Missed shots is required";
     public static final String MISSED_SHOTS_MIN = "Missed shots cannot be negative";
+
+    public static final String USERNAME_REQUIRED = "Username is required";
+    public static final String USERNAME_LENGTH = "Username must be between 3 and 100 characters";
+
+    public static final String PASSWORD_REQUIRED = "Password is required";
+    public static final String PASSWORD_LENGTH = "Password must be at least 6 characters";
+
+    public static final String ROLE_REQUIRED = "Role is required";
 }

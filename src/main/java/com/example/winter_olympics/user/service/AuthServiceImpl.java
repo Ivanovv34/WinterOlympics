@@ -2,12 +2,14 @@ package com.example.winter_olympics.user.service;
 
 import com.example.winter_olympics.common.constants.ErrorMessages;
 import com.example.winter_olympics.common.exception.BadRequestException;
+import com.example.winter_olympics.config.JwtService;
 import com.example.winter_olympics.user.dto.AuthResponse;
 import com.example.winter_olympics.user.dto.LoginRequest;
 import com.example.winter_olympics.user.dto.RegisterRequest;
 import com.example.winter_olympics.user.model.UserEntity;
 import com.example.winter_olympics.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,7 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     @Override
     public AuthResponse register(RegisterRequest request) {
@@ -47,10 +50,19 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private AuthResponse mapToResponse(UserEntity user) {
+        String token = jwtService.generateToken(
+                User.builder()
+                        .username(user.getUsername())
+                        .password(user.getPassword())
+                        .roles(user.getRole().name())
+                        .build()
+        );
+
         return new AuthResponse(
                 user.getId(),
                 user.getUsername(),
-                user.getRole()
+                user.getRole(),
+                token
         );
     }
 }

@@ -1,6 +1,7 @@
 package com.example.winter_olympics.user.service;
 
 import com.example.winter_olympics.common.exception.BadRequestException;
+import com.example.winter_olympics.config.JwtService;
 import com.example.winter_olympics.user.dto.AuthResponse;
 import com.example.winter_olympics.user.dto.LoginRequest;
 import com.example.winter_olympics.user.dto.RegisterRequest;
@@ -30,6 +31,9 @@ class AuthServiceImplTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private JwtService jwtService;
+
     @InjectMocks
     private AuthServiceImpl authService;
 
@@ -50,16 +54,19 @@ class AuthServiceImplTest {
         when(userRepository.existsByUsername("admin")).thenReturn(false);
         when(passwordEncoder.encode("admin123")).thenReturn("encoded-password");
         when(userRepository.save(any(UserEntity.class))).thenReturn(savedUser);
+        when(jwtService.generateToken(any())).thenReturn("test-token");
 
         AuthResponse response = authService.register(request);
 
         assertThat(response.id()).isEqualTo(1L);
         assertThat(response.username()).isEqualTo("admin");
         assertThat(response.role()).isEqualTo(Role.ADMIN);
+        assertThat(response.token()).isEqualTo("test-token");
 
         verify(userRepository).existsByUsername("admin");
         verify(passwordEncoder).encode("admin123");
         verify(userRepository).save(any(UserEntity.class));
+        verify(jwtService).generateToken(any());
     }
 
     @Test
@@ -78,6 +85,7 @@ class AuthServiceImplTest {
 
         verify(userRepository).existsByUsername("admin");
         verify(userRepository, never()).save(any(UserEntity.class));
+        verify(jwtService, never()).generateToken(any());
     }
 
     @Test
@@ -95,15 +103,18 @@ class AuthServiceImplTest {
 
         when(userRepository.findByUsername("admin")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("admin123", "encoded-password")).thenReturn(true);
+        when(jwtService.generateToken(any())).thenReturn("test-token");
 
         AuthResponse response = authService.login(request);
 
         assertThat(response.id()).isEqualTo(1L);
         assertThat(response.username()).isEqualTo("admin");
         assertThat(response.role()).isEqualTo(Role.ADMIN);
+        assertThat(response.token()).isEqualTo("test-token");
 
         verify(userRepository).findByUsername("admin");
         verify(passwordEncoder).matches("admin123", "encoded-password");
+        verify(jwtService).generateToken(any());
     }
 
     @Test
@@ -128,5 +139,6 @@ class AuthServiceImplTest {
 
         verify(userRepository).findByUsername("admin");
         verify(passwordEncoder).matches("wrongpass", "encoded-password");
+        verify(jwtService, never()).generateToken(any());
     }
 }

@@ -21,7 +21,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDate;
 
 import static org.hamcrest.Matchers.is;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -41,6 +40,8 @@ class CompetitionFlowIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private String adminToken;
+
     @BeforeEach
     void setUpAdminUser() throws Exception {
         RegisterRequest adminRequest = new RegisterRequest(
@@ -53,6 +54,22 @@ class CompetitionFlowIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(adminRequest)))
                 .andExpect(status().isCreated());
+
+        String loginResponse = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "username": "admin",
+                                  "password": "admin123"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        JsonNode jsonNode = objectMapper.readTree(loginResponse);
+        adminToken = jsonNode.get("token").asText();
     }
 
     @Test
@@ -71,7 +88,7 @@ class CompetitionFlowIntegrationTest {
         enterFirstRun(competitionId, athleteThreeId, "54.800");
 
         mockMvc.perform(post("/api/competitions/{competitionId}/slalom/qualify-second-run", competitionId)
-                        .with(httpBasic("admin", "admin123"))
+                        .header("Authorization", bearerToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -85,7 +102,7 @@ class CompetitionFlowIntegrationTest {
         enterSecondRun(competitionId, athleteThreeId, "55.100");
 
         mockMvc.perform(post("/api/competitions/{competitionId}/slalom/calculate-ranking", competitionId)
-                        .with(httpBasic("admin", "admin123")))
+                        .header("Authorization", bearerToken()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].rankPosition", is(1)))
                 .andExpect(jsonPath("$[0].medal", is("GOLD")))
@@ -97,22 +114,6 @@ class CompetitionFlowIntegrationTest {
         mockMvc.perform(get("/api/competitions/{competitionId}/slalom/ranking", competitionId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()", is(3)));
-    }
-
-    @Test
-    void creatingCompetitionWithoutAdminAuthShouldReturnUnauthorized() throws Exception {
-        CreateCompetitionRequest request = new CreateCompetitionRequest(
-                "Men Slalom 2026",
-                CompetitionType.SLALOM,
-                Gender.MALE,
-                18,
-                LocalDate.of(2026, 6, 1)
-        );
-
-        mockMvc.perform(post("/api/competitions")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -132,7 +133,7 @@ class CompetitionFlowIntegrationTest {
         enterBiathlonResult(competitionId, athleteThreeId, "1520.000", 0);
 
         mockMvc.perform(post("/api/competitions/{competitionId}/biathlon/calculate-ranking", competitionId)
-                        .with(httpBasic("admin", "admin123")))
+                        .header("Authorization", bearerToken()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].rankPosition", is(1)))
                 .andExpect(jsonPath("$[0].medal", is("GOLD")))
@@ -152,6 +153,22 @@ class CompetitionFlowIntegrationTest {
                 .andExpect(jsonPath("$[2].medal", is("BRONZE")));
     }
 
+    @Test
+    void creatingCompetitionWithoutAdminAuthShouldReturnUnauthorized() throws Exception {
+        CreateCompetitionRequest request = new CreateCompetitionRequest(
+                "Men Slalom 2026",
+                CompetitionType.SLALOM,
+                Gender.MALE,
+                18,
+                LocalDate.of(2026, 6, 1)
+        );
+
+        mockMvc.perform(post("/api/competitions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
     private Long createSlalomCompetition() throws Exception {
         CreateCompetitionRequest request = new CreateCompetitionRequest(
                 "Men Slalom 2026",
@@ -162,11 +179,35 @@ class CompetitionFlowIntegrationTest {
         );
 
         String response = mockMvc.perform(post("/api/competitions")
-                        .with(httpBasic("admin", "admin123"))
+                        .header("Authorization", bearerToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name", is("Men Slalom 2026")))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        JsonNode jsonNode = objectMapper.readTree(response);
+
+        return jsonNode.get("id").asLong();
+    }
+
+    private Long createBiathlonCompetition() throws Exception {
+        CreateCompetitionRequest request = new CreateCompetitionRequest(
+                "Men Biathlon 2026",
+                CompetitionType.BIATHLON,
+                Gender.MALE,
+                18,
+                LocalDate.of(2026, 6, 5)
+        );
+
+        String response = mockMvc.perform(post("/api/competitions")
+                        .header("Authorization", bearerToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name", is("Men Biathlon 2026")))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
@@ -186,7 +227,7 @@ class CompetitionFlowIntegrationTest {
         );
 
         String response = mockMvc.perform(post("/api/athletes")
-                        .with(httpBasic("admin", "admin123"))
+                        .header("Authorization", bearerToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -201,13 +242,13 @@ class CompetitionFlowIntegrationTest {
 
     private void registerAthlete(Long competitionId, Long athleteId) throws Exception {
         mockMvc.perform(post("/api/competitions/{competitionId}/registrations/{athleteId}", competitionId, athleteId)
-                        .with(httpBasic("admin", "admin123")))
+                        .header("Authorization", bearerToken()))
                 .andExpect(status().isCreated());
     }
 
     private void enterFirstRun(Long competitionId, Long athleteId, String firstRunTime) throws Exception {
         mockMvc.perform(post("/api/competitions/{competitionId}/slalom/first-run", competitionId)
-                        .with(httpBasic("admin", "admin123"))
+                        .header("Authorization", bearerToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -221,7 +262,7 @@ class CompetitionFlowIntegrationTest {
 
     private void enterSecondRun(Long competitionId, Long athleteId, String secondRunTime) throws Exception {
         mockMvc.perform(post("/api/competitions/{competitionId}/slalom/second-run", competitionId)
-                        .with(httpBasic("admin", "admin123"))
+                        .header("Authorization", bearerToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -233,30 +274,6 @@ class CompetitionFlowIntegrationTest {
                 .andExpect(status().isOk());
     }
 
-    private Long createBiathlonCompetition() throws Exception {
-        CreateCompetitionRequest request = new CreateCompetitionRequest(
-                "Men Biathlon 2026",
-                CompetitionType.BIATHLON,
-                Gender.MALE,
-                18,
-                LocalDate.of(2026, 6, 5)
-        );
-
-        String response = mockMvc.perform(post("/api/competitions")
-                        .with(httpBasic("admin", "admin123"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name", is("Men Biathlon 2026")))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        JsonNode jsonNode = objectMapper.readTree(response);
-
-        return jsonNode.get("id").asLong();
-    }
-
     private void enterBiathlonResult(
             Long competitionId,
             Long athleteId,
@@ -264,16 +281,20 @@ class CompetitionFlowIntegrationTest {
             int missedShots
     ) throws Exception {
         mockMvc.perform(post("/api/competitions/{competitionId}/biathlon/results", competitionId)
-                        .with(httpBasic("admin", "admin123"))
+                        .header("Authorization", bearerToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                            {
-                              "athleteId": %d,
-                              "skiTime": %s,
-                              "missedShots": %d,
-                              "didNotFinish": false
-                            }
-                            """.formatted(athleteId, skiTime, missedShots)))
+                                {
+                                  "athleteId": %d,
+                                  "skiTime": %s,
+                                  "missedShots": %d,
+                                  "didNotFinish": false
+                                }
+                                """.formatted(athleteId, skiTime, missedShots)))
                 .andExpect(status().isOk());
+    }
+
+    private String bearerToken() {
+        return "Bearer " + adminToken;
     }
 }

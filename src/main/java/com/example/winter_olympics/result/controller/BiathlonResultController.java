@@ -19,7 +19,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/competitions/{competitionId}/biathlon")
-@SecurityRequirement(name = "basicAuth")
+@SecurityRequirement(name = "bearerAuth")
 public class BiathlonResultController {
 
     private final BiathlonResultService biathlonResultService;

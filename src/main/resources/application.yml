@@ -1,5 +1,9 @@
 spring:
   application:
+    security:
+      jwt:
+        secret-key: 0123456789abcdef0123456789abcdef0123456789abcdef
+        expiration-ms: 86400000
     name: winter-olympics
 
   profiles:

@@ -46,7 +46,8 @@ class AuthIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.username", is("admin")))
-                .andExpect(jsonPath("$.role", is("ADMIN")));
+                .andExpect(jsonPath("$.role", is("ADMIN")))
+                .andExpect(jsonPath("$.token").exists());
     }
 
     @Test
@@ -72,7 +73,8 @@ class AuthIntegrationTest {
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username", is("admin")))
-                .andExpect(jsonPath("$.role", is("ADMIN")));
+                .andExpect(jsonPath("$.role", is("ADMIN")))
+                .andExpect(jsonPath("$.token").exists());
     }
 
     @Test

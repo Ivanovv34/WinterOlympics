@@ -5,6 +5,7 @@ import com.example.winter_olympics.user.model.Role;
 public record AuthResponse(
         Long id,
         String username,
-        Role role
+        Role role,
+        String token
 ) {
 }

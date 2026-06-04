@@ -160,7 +160,7 @@ class CompetitionFlowIntegrationTest {
                 CompetitionType.SLALOM,
                 Gender.MALE,
                 18,
-                LocalDate.of(2026, 6, 1)
+                LocalDate.of(2026, 8, 1)
         );
 
         mockMvc.perform(post("/api/competitions")
@@ -175,7 +175,7 @@ class CompetitionFlowIntegrationTest {
                 CompetitionType.SLALOM,
                 Gender.MALE,
                 18,
-                LocalDate.of(2026, 6, 1)
+                LocalDate.of(2026, 8, 1)
         );
 
         String response = mockMvc.perform(post("/api/competitions")
@@ -199,7 +199,7 @@ class CompetitionFlowIntegrationTest {
                 CompetitionType.BIATHLON,
                 Gender.MALE,
                 18,
-                LocalDate.of(2026, 6, 5)
+                LocalDate.of(2026, 8, 5)
         );
 
         String response = mockMvc.perform(post("/api/competitions")

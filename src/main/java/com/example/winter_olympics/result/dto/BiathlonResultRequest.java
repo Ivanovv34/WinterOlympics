@@ -2,6 +2,7 @@ package com.example.winter_olympics.result.dto;
 
 import com.example.winter_olympics.common.constants.ValidationMessages;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
@@ -17,6 +18,7 @@ public record BiathlonResultRequest(
 
         @NotNull(message = ValidationMessages.MISSED_SHOTS_REQUIRED)
         @Min(value = 0, message = ValidationMessages.MISSED_SHOTS_MIN)
+        @Max(value = 100, message = ValidationMessages.MISSED_SHOTS_MAX)
         Integer missedShots,
 
         boolean didNotFinish

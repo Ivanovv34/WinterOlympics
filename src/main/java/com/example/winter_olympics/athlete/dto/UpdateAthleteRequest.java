@@ -12,15 +12,15 @@ import java.time.LocalDate;
 public record UpdateAthleteRequest(
 
         @NotBlank(message = ValidationMessages.FIRST_NAME_REQUIRED)
-        @Size(max = 100, message = ValidationMessages.FIRST_NAME_MAX_LENGTH)
+        @Size(min = 2, max = 100, message = ValidationMessages.FIRST_NAME_MIN_LENGTH)
         String firstName,
 
         @NotBlank(message = ValidationMessages.LAST_NAME_REQUIRED)
-        @Size(max = 100, message = ValidationMessages.LAST_NAME_MAX_LENGTH)
+        @Size(min = 2, max = 100, message = ValidationMessages.LAST_NAME_MIN_LENGTH)
         String lastName,
 
         @NotBlank(message = ValidationMessages.COUNTRY_REQUIRED)
-        @Size(max = 100, message = ValidationMessages.COUNTRY_MAX_LENGTH)
+        @Size(min = 2, max = 100, message = ValidationMessages.COUNTRY_MIN_LENGTH)
         String country,
 
         @NotNull(message = ValidationMessages.GENDER_REQUIRED)

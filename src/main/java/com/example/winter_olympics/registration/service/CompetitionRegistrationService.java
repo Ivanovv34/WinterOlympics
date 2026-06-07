@@ -8,7 +8,11 @@ public interface CompetitionRegistrationService {
 
     RegistrationResponse registerAthlete(Long competitionId, Long athleteId);
 
+    RegistrationResponse registerMe(Long competitionId);
+
     void unregisterAthlete(Long competitionId, Long athleteId);
+
+    void unregisterMe(Long competitionId);
 
     List<RegistrationResponse> getRegistrationsByCompetition(Long competitionId);
 

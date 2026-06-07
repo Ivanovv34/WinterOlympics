@@ -18,6 +18,7 @@ public class CompetitionRegistrationController {
 
     private final CompetitionRegistrationService registrationService;
 
+    // ── Register by athleteId (ADMIN) ─────────────────────────────────────
     @PostMapping("/api/competitions/{competitionId}/registrations/{athleteId}")
     public ResponseEntity<RegistrationResponse> registerAthlete(
             @PathVariable Long competitionId,
@@ -32,12 +33,37 @@ public class CompetitionRegistrationController {
         return ResponseEntity.created(location).body(registration);
     }
 
+    // ── Register current user's athlete (ATHLETE) ─────────────────────────
+    @PostMapping("/api/competitions/{competitionId}/registrations/me")
+    public ResponseEntity<RegistrationResponse> registerMe(
+            @PathVariable Long competitionId
+    ) {
+        RegistrationResponse registration = registrationService.registerMe(competitionId);
+
+        URI location = URI.create(
+                "/api/competitions/" + competitionId + "/registrations/me"
+        );
+
+        return ResponseEntity.created(location).body(registration);
+    }
+
+    // ── Unregister by athleteId (ADMIN) ───────────────────────────────────
     @DeleteMapping("/api/competitions/{competitionId}/registrations/{athleteId}")
     public ResponseEntity<Void> unregisterAthlete(
             @PathVariable Long competitionId,
             @PathVariable Long athleteId
     ) {
         registrationService.unregisterAthlete(competitionId, athleteId);
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    // ── Unregister current user's athlete (ATHLETE) ───────────────────────
+    @DeleteMapping("/api/competitions/{competitionId}/registrations/me")
+    public ResponseEntity<Void> unregisterMe(
+            @PathVariable Long competitionId
+    ) {
+        registrationService.unregisterMe(competitionId);
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }

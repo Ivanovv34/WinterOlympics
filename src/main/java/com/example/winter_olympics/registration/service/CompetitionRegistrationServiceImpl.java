@@ -11,7 +11,10 @@ import com.example.winter_olympics.competition.repository.CompetitionRepository;
 import com.example.winter_olympics.registration.dto.RegistrationResponse;
 import com.example.winter_olympics.registration.model.CompetitionRegistrationEntity;
 import com.example.winter_olympics.registration.repository.CompetitionRegistrationRepository;
+import com.example.winter_olympics.user.model.UserEntity;
+import com.example.winter_olympics.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -26,6 +29,7 @@ public class CompetitionRegistrationServiceImpl implements CompetitionRegistrati
     private final CompetitionRegistrationRepository registrationRepository;
     private final CompetitionRepository competitionRepository;
     private final AthleteRepository athleteRepository;
+    private final UserRepository userRepository;
 
     @Override
     public RegistrationResponse registerAthlete(Long competitionId, Long athleteId) {
@@ -38,9 +42,21 @@ public class CompetitionRegistrationServiceImpl implements CompetitionRegistrati
         registration.setCompetition(competition);
         registration.setAthlete(athlete);
 
-        CompetitionRegistrationEntity savedRegistration = registrationRepository.save(registration);
+        return mapToResponse(registrationRepository.save(registration));
+    }
 
-        return mapToResponse(savedRegistration);
+    @Override
+    public RegistrationResponse registerMe(Long competitionId) {
+        CompetitionEntity competition = findCompetitionById(competitionId);
+        AthleteEntity athlete = getCurrentUserAthlete();
+
+        validateRegistration(competition, athlete);
+
+        CompetitionRegistrationEntity registration = new CompetitionRegistrationEntity();
+        registration.setCompetition(competition);
+        registration.setAthlete(athlete);
+
+        return mapToResponse(registrationRepository.save(registration));
     }
 
     @Override
@@ -49,6 +65,19 @@ public class CompetitionRegistrationServiceImpl implements CompetitionRegistrati
                 .findByCompetitionIdAndAthleteId(competitionId, athleteId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         ErrorMessages.REGISTRATION_NOT_FOUND.formatted(competitionId, athleteId)
+                ));
+
+        registrationRepository.delete(registration);
+    }
+
+    @Override
+    public void unregisterMe(Long competitionId) {
+        AthleteEntity athlete = getCurrentUserAthlete();
+
+        CompetitionRegistrationEntity registration = registrationRepository
+                .findByCompetitionIdAndAthleteId(competitionId, athlete.getId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        ErrorMessages.REGISTRATION_NOT_FOUND.formatted(competitionId, athlete.getId())
                 ));
 
         registrationRepository.delete(registration);
@@ -64,7 +93,7 @@ public class CompetitionRegistrationServiceImpl implements CompetitionRegistrati
 
         return registrationRepository.findByCompetitionId(competitionId)
                 .stream()
-                .sorted(Comparator.comparing(registration -> registration.getAthlete().getId()))
+                .sorted(Comparator.comparing(r -> r.getAthlete().getId()))
                 .map(this::mapToResponse)
                 .toList();
     }
@@ -79,9 +108,23 @@ public class CompetitionRegistrationServiceImpl implements CompetitionRegistrati
 
         return registrationRepository.findByAthleteId(athleteId)
                 .stream()
-                .sorted(Comparator.comparing(registration -> registration.getCompetition().getCompetitionDate()))
+                .sorted(Comparator.comparing(r -> r.getCompetition().getCompetitionDate()))
                 .map(this::mapToResponse)
                 .toList();
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────
+
+    private AthleteEntity getCurrentUserAthlete() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new BadRequestException("User not found."));
+
+        return athleteRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new BadRequestException(
+                        "You don't have an athlete profile yet. Please register your athlete profile first."
+                ));
     }
 
     private void validateRegistration(CompetitionEntity competition, AthleteEntity athlete) {
@@ -105,12 +148,9 @@ public class CompetitionRegistrationServiceImpl implements CompetitionRegistrati
             throw new BadRequestException(ErrorMessages.ATHLETE_GENDER_DOES_NOT_MATCH);
         }
 
-        int athleteAgeAtCompetitionDate = calculateAge(
-                athlete.getBirthDate(),
-                competition.getCompetitionDate()
-        );
+        int athleteAge = calculateAge(athlete.getBirthDate(), competition.getCompetitionDate());
 
-        if (athleteAgeAtCompetitionDate < competition.getMinAge()) {
+        if (athleteAge < competition.getMinAge()) {
             throw new BadRequestException(ErrorMessages.ATHLETE_DOES_NOT_MEET_MINIMUM_AGE);
         }
     }
@@ -137,15 +177,13 @@ public class CompetitionRegistrationServiceImpl implements CompetitionRegistrati
         AthleteEntity athlete = registration.getAthlete();
         CompetitionEntity competition = registration.getCompetition();
 
-        String athleteFullName = athlete.getFirstName() + " " + athlete.getLastName();
-
         return new RegistrationResponse(
                 registration.getId(),
                 competition.getId(),
                 competition.getName(),
                 competition.getType(),
                 athlete.getId(),
-                athleteFullName,
+                athlete.getFirstName() + " " + athlete.getLastName(),
                 athlete.getCountry(),
                 athlete.getGender(),
                 registration.getRegisteredAt()

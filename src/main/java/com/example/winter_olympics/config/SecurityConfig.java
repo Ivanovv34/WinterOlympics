@@ -50,16 +50,19 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/athletes/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/competitions/**").permitAll()
 
-                        .requestMatchers(HttpMethod.POST, "/api/athletes/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/athletes/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/athletes/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST,   "/api/athletes/**").hasAnyRole("ADMIN", "ATHLETE")
+                        .requestMatchers(HttpMethod.PUT,    "/api/athletes/**").hasAnyRole("ADMIN", "ATHLETE")
+                        .requestMatchers(HttpMethod.DELETE, "/api/athletes/**").hasAnyRole("ADMIN", "ATHLETE")
 
-                        .requestMatchers(HttpMethod.POST, "/api/competitions").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/competitions/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/competitions/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/api/competitions").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/api/competitions/**").hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.POST, "/api/competitions/*/slalom/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/competitions/*/biathlon/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/api/competitions/*/registrations/**")
+                                .hasAnyRole("ADMIN", "ATHLETE")
+                                .requestMatchers(HttpMethod.DELETE, "/api/competitions/*/registrations/**")
+                                .hasAnyRole("ADMIN", "ATHLETE")
+
+                                .requestMatchers(HttpMethod.DELETE, "/api/competitions/**").hasRole("ADMIN")
 
                         .requestMatchers(HttpMethod.POST, "/api/competitions/*/registrations/**")
                         .hasAnyRole("ADMIN", "ATHLETE")
